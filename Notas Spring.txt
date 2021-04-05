@@ -1,2 +1,133 @@
 GENERAR PROYECTO---------- https://start.spring.io  Maven - War -Java 8
 DEPENDENCIAS--- MYSQL driver y JPA (Mapea datos)
+Java Extension PAck
+Spring Boot Tools
+
+pom.xml -> tiene las dependencias
+
+instalar lo necesario -> mvnw.cmd spring-boot:run
+
+Al instalar Spring con dependencia de MYSQL y JPA se debe modificar 
+src/main/application.properties:
+
+	spring.datasource.url=jdbc:mysql://localhost:3306/spring
+	spring.datasource.username=mauri
+	spring.datasource.password=admin
+	spring.jpa.hibernate.ddl-auto = update
+
+CREACIION DE TABLAS
+
+import javax.persistence.*;
+@Entity
+@Table(name="usuario") // el nombre de la tabla
+
+dentro de la clasee---- -> La columna id se gener automaticamente, o debe ser null y debe ser unica
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+@Column(unique = true,nullable = false)
+
+------------ pilas getters y setters
+
+
+...........REPOSITORIES
+
+package com.dmcm.demo.repositories;
+
+	debe ser interfaz y extender de CrudRepository pasandole el modelo y el tipo de identificador
+
+import com.dmcm.demo.models.UsuarioModel;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UsuarioRespository extends CrudRepository<UsuarioModel,Long>{
+	// sin las 3 lineas hace lo basico de crud, al colocar lo demas particularisa para cada atributo
+    public abstract ArrayList<UsuarioModel> findByPrioridad(Integer prioridad);
+    public abstract ArrayList<UsuarioModel> findByName(String name);
+    public abstract ArrayList<UsuarioModel> findByEmail(String email);   
+}
+
+...........SERVICE
+
+@Service   // tipo servicios
+public class UsuarioService {
+    @Autowired               // instancia el repositorio del usuario
+    UsuarioRespository usuarioRespository;
+
+    public ArrayList<UsuarioModel> obtenerUsuarios(){
+        return (ArrayList<UsuarioModel>) usuarioRespository.findAll(); // castea todos los usuarios enocntrados para devovlerlo como json
+    }
+
+    public UsuarioModel guardarUsuario(UsuarioModel usuario){ // recibe un usuario y lo regresa con el id asignado
+        return usuarioRespository.save(usuario);
+    }
+    
+}
+
+
+
+.................CONTROLLER
+
+@RestController
+@RequestMapping("/usuario") // ruta de usuario
+public class UsuarioController {
+    @Autowired
+    UsuarioService usuarioService;
+
+    @GetMapping() // get desde /usuarios
+    public ArrayList<UsuarioModel> obtenerUsuarios(){
+        return usuarioService.obtenerUsuarios();
+    }
+
+    @PostMapping() // post desde /usuarios 
+    public UsuarioModel guardarUsuario(@RequestBody UsuarioModel usuario){ // para obtener datos desde el body de la peticion la hace e tipo UsuarioModel y la guarda
+        return this.usuarioService.guardarUsuario(usuario);
+    }
+    
+    @GetMapping(path = "/search/{id}") // get desde /usuarios/search/numeroDeUsuario
+    public Optional <UsuarioModel> obtenerUsuarioPorId(@PathVariable("id") Long id){ // obtiene valor de is del path
+        return this.usuarioService.obtenerPorId(id);
+    }
+
+    @GetMapping(path = "/querry") // get desde /usuarios/querry?prioridad=numeroDePrioridad
+    public ArrayList<UsuarioModel> obtenerUsuariosPorPrioridad(@RequestParam("prioridad") Integer prioridad){
+        return usuarioService.obtenerPorPrioridad(prioridad);
+    }
+
+    @GetMapping(path = "/querry") // get desde /usuarios/querry?name=nombre
+    public ArrayList<UsuarioModel> obtenerUsuariosPorName(@RequestParam("name") String name){
+        return usuarioService.obtenerPorName(name);
+    }
+
+    @GetMapping(path = "/querry") // get desde /usuarios/querry?email=Correo
+    public ArrayList<UsuarioModel> obtenerUsuariosPorEmail(@RequestParam("email") String email){
+        return usuarioService.obtenerPorName(email);
+    }
+
+    @DeleteMapping(path = "/{id}") // metodo delete
+    public String eliminarPorId(@PathVariable("id") Long id){
+        boolean ok = this.usuarioService.eliminarUsuario(id);
+        if (ok){
+            return "Usuario Eliminado con id " + id;
+        }else{
+            return "No se pudo eliminar usuario con id " + id;
+        }
+    
+    }
+
+**********POST
+POST http://localhost:8080/usuario 
+Content-Type: application/json
+
+{
+    "name":"Luis",
+    "email": "luis@gmail.com",
+    "prioridad": 2
+}
+
+
+
+
+
+
+
