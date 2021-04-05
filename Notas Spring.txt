@@ -1,0 +1,2 @@
+GENERAR PROYECTO---------- https://start.spring.io  Maven - War -Java 8
+DEPENDENCIAS--- MYSQL driver y JPA (Mapea datos)
