@@ -1,5 +1,5 @@
-###
-POST http://localhost:8080/usuario 
+### Crear usuario
+POST http://localhost:8080/usuarios 
 Content-Type: application/json
 
 {
@@ -7,6 +7,25 @@ Content-Type: application/json
     "email": "luis@gmail.com",
     "prioridad": 2
 }
+### Actualizar usuario (usuar id)
+POST http://localhost:8080/usuarios 
+Content-Type: application/json
 
-### 
-GET http://localhost:8080/usuario
+{
+    "id": 4,
+    "name":"Juan",
+    "email": "luis@gmail.com",
+    "prioridad": 2
+}
+
+### Obtener todos usuarios
+GET http://localhost:8080/usuarios
+
+### Buscar usuario
+GET http://localhost:8080/usuarios/search/2
+
+### Buscar usuario por id
+GET http://localhost:8080/usuarios/querry?prioridad=2
+
+### Eliminar usuario
+DELETE http://localhost:8080/usuarios/3
